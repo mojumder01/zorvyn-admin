@@ -38,18 +38,20 @@ export interface DayPoint {
   date: Date;
   revenue: number;
   orders: number;
+  units: number;
 }
 
 /** One point per day in the period, including days with no sales. */
 export function dailySeries(orders: Order[], period: Period): DayPoint[] {
   const byDay = new Map<string, DayPoint>();
-  for (let d = period.from; d < period.to; d = addDays(d, 1)) byDay.set(dayKey(d), { date: d, revenue: 0, orders: 0 });
+  for (let d = period.from; d < period.to; d = addDays(d, 1)) byDay.set(dayKey(d), { date: d, revenue: 0, orders: 0, units: 0 });
   for (const o of orders) {
     if (!isSale(o) || !inPeriod(o, period)) continue;
     const point = byDay.get(dayKey(new Date(o.createdAt)));
     if (point) {
       point.revenue += o.total;
       point.orders += 1;
+      point.units += o.items.reduce((n, it) => n + it.quantity, 0);
     }
   }
   return [...byDay.values()];
@@ -151,3 +153,36 @@ export function lowStock(db: Database): LowStockRow[] {
 }
 
 export const totalStock = (p: Product) => Object.values(p.stock).reduce((sum, n) => sum + n, 0);
+
+/** Orders in each status (cancelled included). */
+export function statusCounts(orders: Order[]): Record<Order['status'], number> {
+  const counts = { pending: 0, confirmed: 0, shipped: 0, delivered: 0, cancelled: 0 };
+  for (const o of orders) counts[o.status] += 1;
+  return counts;
+}
+
+/** Orders placed in each hour of the day, 9 am to 11 pm. */
+export function ordersByHour(orders: Order[]): { hour: number; orders: number }[] {
+  const hours = Array.from({ length: 15 }, (_, i) => ({ hour: 9 + i, orders: 0 }));
+  for (const o of orders) {
+    if (!isSale(o)) continue;
+    const h = new Date(o.createdAt).getHours();
+    const slot = hours.find((x) => x.hour === h);
+    if (slot) slot.orders += 1;
+  }
+  return hours;
+}
+
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** Revenue and orders per weekday, Saturday first (the Bangladeshi work week). */
+export function salesByWeekday(orders: Order[]): { day: string; revenue: number; orders: number }[] {
+  const days = WEEKDAYS.map((day) => ({ day, revenue: 0, orders: 0 }));
+  for (const o of orders) {
+    if (!isSale(o)) continue;
+    const d = days[new Date(o.createdAt).getDay()];
+    d.revenue += o.total;
+    d.orders += 1;
+  }
+  return [...days.slice(6), ...days.slice(0, 6)];
+}

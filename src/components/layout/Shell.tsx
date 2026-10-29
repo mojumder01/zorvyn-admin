@@ -24,14 +24,14 @@ export function Shell({ title, actions, children }: { title: string; actions?: R
 
   return (
     <div className="min-h-dvh lg:pl-64">
-      <aside className="no-print fixed inset-y-0 left-0 hidden w-64 border-r border-line lg:block">
+      <aside className="no-print fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line lg:block">
         <Sidebar />
       </aside>
       <dialog ref={drawer} className="drawer no-print w-72 lg:hidden" aria-label="Menu" onClose={() => setMenuOpen(false)} onClick={(e) => e.target === drawer.current && setMenuOpen(false)}>
         {menuOpen && <Sidebar onNavigate={() => setMenuOpen(false)} />}
       </dialog>
 
-      <header className="no-print sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-panel/90 px-4 backdrop-blur sm:px-6">
+      <header className="no-print sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-panel/75 px-4 backdrop-blur-md sm:px-6">
         <button type="button" onClick={() => setMenuOpen(true)} className="grid size-10 place-items-center rounded-lg text-ink-2 hover:bg-sunken lg:hidden" aria-label="Open menu">
           <Menu className="size-5" aria-hidden />
         </button>

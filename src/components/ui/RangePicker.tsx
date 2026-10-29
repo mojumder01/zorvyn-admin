@@ -10,7 +10,7 @@ export function RangePicker({ value, onChange }: { value: Range; onChange: (r: R
           type="button"
           onClick={() => onChange(r)}
           aria-pressed={value === r}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium ${value === r ? 'bg-ink text-page' : 'text-ink-2 hover:text-ink'}`}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium ${value === r ? 'bg-gradient-to-r from-brand to-brand-2 text-white shadow-sm' : 'text-ink-2 hover:text-ink'}`}
         >
           Last {r} days
         </button>

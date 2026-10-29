@@ -58,10 +58,10 @@ export function Orders() {
                 navigate(t === 'all' ? '/orders' : `/orders?status=${t}`);
                 setPage(1);
               }}
-              className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${status === t ? 'bg-ink text-page' : 'text-ink-2 hover:bg-sunken hover:text-ink'}`}
+              className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${status === t ? 'bg-gradient-to-r from-brand to-brand-2 text-white shadow-sm' : 'text-ink-2 hover:bg-sunken hover:text-ink'}`}
             >
               {t === 'all' ? 'All' : STATUS_LABEL[t]}
-              <span className={`rounded-full px-1.5 text-xs tabular-nums ${status === t ? 'bg-page/20' : 'bg-sunken'}`}>{n}</span>
+              <span className={`rounded-full px-1.5 text-xs tabular-nums ${status === t ? 'bg-white/25' : 'bg-sunken'}`}>{n}</span>
             </button>
           );
         })}

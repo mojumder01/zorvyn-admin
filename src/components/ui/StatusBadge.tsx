@@ -21,10 +21,4 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
   );
 }
 
-export const STATUS_COLOR: Record<OrderStatus, string> = {
-  pending: 'var(--color-warning)',
-  confirmed: 'var(--color-series-1)',
-  shipped: 'var(--color-serious)',
-  delivered: 'var(--color-good)',
-  cancelled: 'var(--color-critical)',
-};
+export { STATUS_COLOR } from '../../data/colors';

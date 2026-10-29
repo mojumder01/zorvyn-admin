@@ -18,7 +18,7 @@ const HEIGHT = 220;
 const PAD = { top: 12, right: 8, bottom: 26, left: 52 };
 
 /** Round axis steps (1, 2 or 5 × 10ⁿ) with about four gridlines. */
-function axisTicks(max: number): number[] {
+export function axisTicks(max: number): number[] {
   if (max <= 0) return [0, 1];
   const rough = max / 4;
   const power = 10 ** Math.floor(Math.log10(rough));
@@ -26,11 +26,12 @@ function axisTicks(max: number): number[] {
   return Array.from({ length: Math.ceil(max / step) + 1 }, (_, i) => i * step);
 }
 
-export function BarChart({ points, formatValue, formatAxis, title, valueLabel, xLabel = 'Date' }: { points: BarPoint[]; formatValue: (v: number) => string; formatAxis: (v: number) => string; title: string; valueLabel: string; xLabel?: string }) {
+export function BarChart({ points, formatValue, formatAxis, title, valueLabel, xLabel = 'Date', noteLabel = 'Orders', color = 'var(--color-series-1)', height = HEIGHT, animateKey }: { points: BarPoint[]; formatValue: (v: number) => string; formatAxis: (v: number) => string; title: string; valueLabel: string; xLabel?: string; noteLabel?: string; color?: string; height?: number; animateKey?: unknown }) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(600);
+  const [width, setWidth] = useState(0);
   const [active, setActive] = useState<number | null>(null);
   const tableId = useId();
+  const gradientId = useId().replace(/:/g, '');
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -43,7 +44,7 @@ export function BarChart({ points, formatValue, formatAxis, title, valueLabel, x
   const ticks = axisTicks(Math.max(0, ...points.map((p) => p.value)));
   const max = ticks[ticks.length - 1];
   const plotW = width - PAD.left - PAD.right;
-  const plotH = HEIGHT - PAD.top - PAD.bottom;
+  const plotH = height - PAD.top - PAD.bottom;
   const slot = plotW / Math.max(1, points.length);
   const gap = slot > 10 ? 2 : 1; // surface gap between bars
   const barW = Math.min(56, Math.max(1, slot - gap)); // few bars (e.g. months) stay slim
@@ -63,9 +64,11 @@ export function BarChart({ points, formatValue, formatAxis, title, valueLabel, x
   return (
     <div>
       <div ref={wrapRef} className="relative" onPointerMove={(e) => pick(e.clientX)} onPointerLeave={() => setActive(null)}>
+        {width > 0 && (
         <svg
+          key={String(animateKey)}
           width={width}
-          height={HEIGHT}
+          height={height}
           role="img"
           aria-label={`${title}. Use the left and right arrow keys to read each value, or open the table below.`}
           tabIndex={0}
@@ -81,6 +84,12 @@ export function BarChart({ points, formatValue, formatAxis, title, valueLabel, x
             e.preventDefault();
           }}
         >
+          <defs>
+            <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor={color} />
+              <stop offset="100%" stopColor={color} stopOpacity="0.55" />
+            </linearGradient>
+          </defs>
           {ticks.map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={width - PAD.right} y1={y(t)} y2={y(t)} className="stroke-line" strokeDasharray={t === 0 ? undefined : '2 4'} />
@@ -99,12 +108,14 @@ export function BarChart({ points, formatValue, formatAxis, title, valueLabel, x
                 {h > 0 && (
                   <path
                     d={`M${x},${PAD.top + plotH} V${top + r} Q${x},${top} ${x + r},${top} H${x + barW - r} Q${x + barW},${top} ${x + barW},${top + r} V${PAD.top + plotH} Z`}
-                    fill="var(--color-series-1)"
+                    fill={`url(#${gradientId})`}
                     opacity={active === null || active === i ? 1 : 0.45}
+                    className="grow-bar animate-grow-y"
+                    style={{ animationDelay: `${Math.min(i * 18, 600)}ms`, transition: 'opacity 0.15s' }}
                   />
                 )}
                 {i % every === 0 && (
-                  <text x={x + barW / 2} y={HEIGHT - 8} textAnchor="middle" className="fill-ink-3 text-[11px]">
+                  <text x={x + barW / 2} y={height - 8} textAnchor="middle" className="fill-ink-3 text-[11px]">
                     {p.tick}
                   </text>
                 )}
@@ -112,6 +123,7 @@ export function BarChart({ points, formatValue, formatAxis, title, valueLabel, x
             );
           })}
         </svg>
+        )}
         {current && (
           <div className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-lg border border-line bg-panel px-3 py-2 text-xs shadow-lg" style={{ left: tipLeft }} role="status">
             <div className="text-sm font-semibold text-ink tabular-nums">{formatValue(current.value)}</div>
@@ -128,7 +140,7 @@ export function BarChart({ points, formatValue, formatAxis, title, valueLabel, x
               <tr>
                 <th className="px-3 py-2 font-medium">{xLabel}</th>
                 <th className="px-3 py-2 text-right font-medium">{valueLabel}</th>
-                <th className="px-3 py-2 text-right font-medium">Orders</th>
+                <th className="px-3 py-2 text-right font-medium">{noteLabel}</th>
               </tr>
             </thead>
             <tbody>
