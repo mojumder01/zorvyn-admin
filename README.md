@@ -46,3 +46,7 @@ src/
   components/  layout (sidebar, shell), UI pieces and charts
   pages/       one file per screen
 ```
+
+## Licence
+
+© 2026 Md Muntasir Mamun Mojumder. All rights reserved. This code is public for viewing only — copying, reuse, redistribution or resale is not allowed without written permission. See [LICENSE](LICENSE).

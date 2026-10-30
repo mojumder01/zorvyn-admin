@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "Zorvyn Admin — a demo e-commerce admin dashboard: orders, products, inventory, customers and reports (demo data, no backend).",
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "dev": "vite",
